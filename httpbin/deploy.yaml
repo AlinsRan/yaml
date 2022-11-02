@@ -1,1 +1,47 @@
 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: httpbin-deployment
+  namespace: test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: httpbin-deployment
+  template:
+    metadata:
+      labels:
+        app: httpbin-deployment
+    spec:
+      containers:
+        - name: httpbin-deployment
+          image: kennethreitz/httpbin:latest
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          resources: {}
+          livenessProbe:
+            tcpSocket:
+              port: 80
+            initialDelaySeconds: 2
+            timeoutSeconds: 2
+            periodSeconds: 5
+            successThreshold: 1
+            failureThreshold: 3
+          readinessProbe:
+            tcpSocket:
+              port: 80
+            initialDelaySeconds: 2
+            timeoutSeconds: 2
+            periodSeconds: 5
+            successThreshold: 1
+            failureThreshold: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 50%
+  revisionHistoryLimit: 10
+  progressDeadlineSeconds: 600
